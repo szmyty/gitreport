@@ -54,3 +54,26 @@ your-output-folder/
 - Optional HTML dashboard
 - GitHub Action mode
 
+## 📊 Dashboard
+
+A simple React + Vite dashboard is included in `dashboard/`. It visualizes commit
+activity using the JSON data in `dashboard/public/data/git-data.json`.
+
+Generate fresh data from any repository:
+
+```bash
+python scripts/export_git_data.py --repo /path/to/repo --since "90 days ago" \
+  --out dashboard/public/data/git-data.json
+```
+
+Then run the development server:
+
+```bash
+cd dashboard
+npm install
+npm run dev
+```
+
+The dashboard will display commits over time, author breakdowns, an activity
+heatmap, and code churn trends.
+
