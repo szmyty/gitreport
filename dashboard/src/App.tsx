@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import { Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -41,6 +42,28 @@ interface GitData {
 
 export default function App() {
   const [data, setData] = useState<GitData>();
+  const commitsRef = useRef<HTMLDivElement>(null);
+  const authorsRef = useRef<HTMLDivElement>(null);
+  const heatmapRef = useRef<HTMLDivElement>(null);
+  const churnRef = useRef<HTMLDivElement>(null);
+
+  const downloadAll = async () => {
+    const sections = [
+      { ref: commitsRef, name: 'commits' },
+      { ref: authorsRef, name: 'authors' },
+      { ref: heatmapRef, name: 'heatmap' },
+      { ref: churnRef, name: 'churn' },
+    ];
+    for (const { ref, name } of sections) {
+      if (ref.current) {
+        const canvas = await html2canvas(ref.current);
+        const link = document.createElement('a');
+        link.download = `${name}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }
+    }
+  };
 
   useEffect(() => {
     fetch('data/git-data.json')
@@ -67,7 +90,8 @@ export default function App() {
   return (
     <div>
       <h1>Git Report Dashboard</h1>
-      <section>
+      <button onClick={downloadAll}>Download Charts</button>
+      <section ref={commitsRef}>
         <h2>Commits Over Time</h2>
         <Line
           data={{
@@ -85,7 +109,7 @@ export default function App() {
           options={{ responsive: true, scales: { x: { ticks: { maxRotation: 90, minRotation: 45 } } } }}
         />
       </section>
-      <section>
+      <section ref={authorsRef}>
         <h2>Author Contributions</h2>
         <Bar
           data={{
@@ -101,7 +125,7 @@ export default function App() {
           options={{ responsive: true, indexAxis: 'y' }}
         />
       </section>
-      <section>
+      <section ref={heatmapRef}>
         <h2>Commit Frequency Heatmap</h2>
         <Bar
           data={{
@@ -116,7 +140,7 @@ export default function App() {
           options={{ responsive: true, scales: { x: { stacked: true }, y: { stacked: true } } }}
         />
       </section>
-      <section>
+      <section ref={churnRef}>
         <h2>Code Churn Over Time</h2>
         <Line
           data={{
